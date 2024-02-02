@@ -138,6 +138,9 @@
   <data name="PropertyDescriptionSchemaFolderOptionsAppendDot" xml:space="preserve">
     <value>Add a dot after the schema name on the folder label.</value>
   </data>
+  <data name="PropertyDescriptionSchemaFolderOptionsSchemaDelimeter" xml:space="preserve">
+    <value>Schema delimeter.</value>
+  </data>
   <data name="PropertyDescriptionSchemaFolderOptionsCloneParentNode" xml:space="preserve">
     <value>Add the right click and connection properties of the parent node to the schema folder node.</value>
   </data>
@@ -173,6 +176,9 @@
   </data>
   <data name="PropertyDisplayNameSchemaFolderOptionsAppendDot" xml:space="preserve">
     <value>Append Dot</value>
+  </data>
+  <data name="PropertyDisplayNameSchemaFolderOptionsSchemaDelimeter" xml:space="preserve">
+    <value>Schema delimeter</value>
   </data>
   <data name="PropertyDisplayNameSchemaFolderOptionsCloneParentNode" xml:space="preserve">
     <value>Clone Parent Node</value>

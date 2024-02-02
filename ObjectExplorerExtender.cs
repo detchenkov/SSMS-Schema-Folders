@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+
 //using System.Text.RegularExpressions;
 using System.Reflection;
 using System.Windows.Forms;
@@ -173,16 +175,37 @@ namespace SsmsSchemaFolders
         private String GetNodeSchemaQuick(TreeNode node)
         {
             var dotIndex = node.Text.IndexOf('.');
-            if (dotIndex != -1)
-                return node.Text.Substring(0, dotIndex);
-            else
-                return null;
+            if (dotIndex == -1) return null;
+
+            try
+            {
+                int cnt = node.Text.Count(x => x == '_');
+                List<string> nodeRules = Options.NodeRules.Split(';').ToList();
+                bool prefix = nodeRules.Any(c => c != "" && node.Text.ToLower().StartsWith(c.ToLower()));
+                if (cnt >= 2)
+                {
+                    int index1 = prefix ? node.Text.IndexOf("_") : 0;
+                    return node.Text.Substring(0, node.Text.IndexOf("_", index1 + 1)).ToLower(); 
+                }
+                else if (cnt == 1)
+                {
+                    return node.Text.Substring(0, node.Text.IndexOf("_")).ToLower(); 
+                }
+                return node.Text.Substring(0, dotIndex).ToLower();
+                //return node.Text.Substring(0, dotIndex);
+            }
+            catch (Exception)
+            {
+                return node.Text.Substring(0, dotIndex).ToLower();
+            }
         }
 
         private String GetNodeSchema(TreeNode node)
         {
             var ni = GetNodeInformation(node);
-            if (ni != null)
+            if (ni == null) return null;
+
+            try
             {
                 // parse ni.Context = Server[@Name='NR-DEV\SQL2008R2EXPRESS']/Database[@Name='tempdb']/Table[@Name='test.''escape''[value]' and @Schema='dbo']
                 // or compare ni.Name vs ni.InvariantName = ObjectName vs SchemaName.ObjectName
@@ -191,10 +214,35 @@ namespace SsmsSchemaFolders
                 //if (match.Success)
                 //    return match.Groups[1].Value;
 
+                int cnt = ni.Name.Count(x => x == '_');
+                List<string> nodeRules = Options.NodeRules.Split(';').ToList();
+                bool prefix = nodeRules.Any(c => c != "" && ni.Name.ToLower().StartsWith(c.ToLower()));
+                if (cnt >= 2)
+                {
+                    int index1 = prefix ? ni.InvariantName.IndexOf("_") : 0;
+                    return ni.InvariantName.Substring(0, ni.InvariantName.IndexOf("_", index1 + 1)).ToLower(); 
+                }
+                else if (cnt == 1)
+                {
+                    return ni.InvariantName.Substring(0, ni.InvariantName.IndexOf("_")).ToLower(); 
+                }
+                else if (cnt == 0)
+                {
+                    return ni.InvariantName.ToLower();
+                }
+
                 if (ni.InvariantName.EndsWith("." + ni.Name))
-                    return ni.InvariantName.Substring(0, ni.InvariantName.Length - ni.Name.Length - 1);
+                    return ni.InvariantName.Substring(0, ni.InvariantName.Length - ni.Name.Length - 1).ToLower();
+                return null;
+                //if (ni.InvariantName.EndsWith("." + ni.Name))
+                //    return ni.InvariantName.Substring(0, ni.InvariantName.Length - ni.Name.Length - 1);
             }
-            return null;
+            catch (Exception)
+            {
+                if (ni.InvariantName.EndsWith("." + ni.Name))
+                    return ni.InvariantName.Substring(0, ni.InvariantName.Length - ni.Name.Length - 1).ToLower();
+                return null;
+            }            
         }
 
         /// <summary>
@@ -266,6 +314,8 @@ namespace SsmsSchemaFolders
             node.Text += " (sorting...)";
             //node.TreeView.Update();
 
+            debug_message($"ReorganizeNodes > {nodeText}, {nodeTag}, {folderLevel}");
+
             var quickAndDirty = (Options.QuickSchema > 0 && node.Nodes.Count > Options.QuickSchema);
 
             //var sw = Stopwatch.StartNew();
@@ -286,6 +336,9 @@ namespace SsmsSchemaFolders
 
             foreach (TreeNode childNode in node.Nodes)
             {
+
+                debug_message($"    {childNode.Text}, {childNode.Tag}, ");
+
                 //skip schema node folders but make sure they are in the folders list
                 if (childNode.Tag != null && childNode.Tag.ToString() == nodeTag)
                 {
@@ -322,7 +375,11 @@ namespace SsmsSchemaFolders
                     folderNode.Tag = nodeTag;
 
                     if (Options.AppendDot)
-                        folderNode.Text += ".";
+                    {
+                        folderNode.Text = $"[{folderNode.Text}]";
+                        //folderNode.BackColor = Color.Yellow;
+                        //folderNode.NodeFont = new Font("Arial", 24, FontStyle.Bold); 
+                    }                        
 
                     if (Options.UseObjectIcon)
                     {
@@ -444,6 +501,8 @@ namespace SsmsSchemaFolders
             node.Text += " (sorting...)";
             node.TreeView.Update();
 
+            debug_message($"ReorganizeNodesWithClear > {nodeText}, {nodeTag}");
+
             var quickAndDirty = (Options.QuickSchema > 0 && node.Nodes.Count > Options.QuickSchema);
 
             var sw = Stopwatch.StartNew();
@@ -505,7 +564,10 @@ namespace SsmsSchemaFolders
                     schemaNode.Tag = nodeTag;
 
                     if (Options.AppendDot)
-                        schemaNode.Text += ".";
+                    {
+                        schemaNode.Text = $"[{schemaNode.Text}]";
+                        //schemaNode.BackColor = Color.Yellow;
+                    }                        
 
                     if (Options.UseObjectIcon)
                     {

@@ -15,5 +15,6 @@ namespace SsmsSchemaFolders
         int Level1MinNodeCount { get; }
         FolderType Level2FolderType { get; }
         int Level2MinNodeCount { get; }
+        string NodeRules { get; }
     }
 }

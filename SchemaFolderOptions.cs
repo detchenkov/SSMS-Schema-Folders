@@ -75,8 +75,13 @@
         [CategoryResources(nameof(SchemaFolderOptions) + "FolderLevel2")]
         [DisplayNameResources(nameof(SchemaFolderOptions) + nameof(Level2MinNodeCount))]
         [DescriptionResources(nameof(SchemaFolderOptions) + nameof(Level2MinNodeCount))]
-        [DefaultValue(200)]
-        public int Level2MinNodeCount { get; set; } = 200;
+        [DefaultValue(200)]public int Level2MinNodeCount { get; set; } = 0;
+
+        [CategoryResources(nameof(SchemaFolderOptions) + "NodeRules")]
+        [DisplayNameResources(nameof(SchemaFolderOptions) + nameof(NodeRules))]
+        [DescriptionResources(nameof(SchemaFolderOptions) + nameof(NodeRules))]
+        [DefaultValue("")]
+        public string NodeRules { get; set; } = "p_;px_;v_;f_;pv_";      
 
     }
 }

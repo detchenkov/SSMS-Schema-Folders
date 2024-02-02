@@ -97,6 +97,15 @@ namespace SsmsSchemaFolders.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Node Rules.
+        /// </summary>
+        internal static string PropertyCategorySchemaFolderOptionsNodeRules {
+            get {
+                return ResourceManager.GetString("PropertyCategorySchemaFolderOptionsNodeRules", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Object Display Options.
         /// </summary>
         internal static string PropertyCategorySchemaFolderOptionsObjectDisplayOptions {
@@ -286,6 +295,15 @@ namespace SsmsSchemaFolders.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Rules.
+        /// </summary>
+        internal static string PropertyDisplayNameSchemaFolderOptionsNodeRules {
+            get {
+                return ResourceManager.GetString("PropertyDisplayNameSchemaFolderOptionsNodeRules", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Quick schema from node text.
         /// </summary>
         internal static string PropertyDisplayNameSchemaFolderOptionsQuickSchema {
@@ -302,7 +320,7 @@ namespace SsmsSchemaFolders.Resources {
                 return ResourceManager.GetString("PropertyDisplayNameSchemaFolderOptionsRenameNode", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Unresponsive timeout.
         /// </summary>
