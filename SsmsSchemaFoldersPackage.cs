@@ -4,6 +4,7 @@ extern alias Ssms2016;
 extern alias Ssms2017;
 extern alias Ssms18;
 extern alias Ssms19;
+extern alias Ssms20;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
@@ -119,6 +120,10 @@ namespace SsmsSchemaFolders
 
                     switch (ssmsInterfacesVersion.FileMajorPart)
                     {
+                        case 20:
+                            debug_message("SsmsVersion:20");
+                            return new Ssms20::SsmsSchemaFolders.ObjectExplorerExtender(this, Options);
+
                         case 19: // v19.1 changed file version numbers
                         case 16:
                             debug_message("SsmsVersion:19");
@@ -154,8 +159,8 @@ namespace SsmsSchemaFolders
                     }
                 }
 
-                ActivityLogEntry(__ACTIVITYLOG_ENTRYTYPE.ALE_WARNING, "Unknown SSMS Version. Defaulting to 19.");
-                return new Ssms19::SsmsSchemaFolders.ObjectExplorerExtender(this, Options);
+                ActivityLogEntry(__ACTIVITYLOG_ENTRYTYPE.ALE_WARNING, "Unknown SSMS Version. Defaulting to 20.");
+                return new Ssms20::SsmsSchemaFolders.ObjectExplorerExtender(this, Options);
             }
             catch (Exception ex)
             {
@@ -180,7 +185,8 @@ namespace SsmsSchemaFolders
         /// Adds new nodes and move items between them
         /// </summary>
         /// <param name="node"></param>
-        private void ReorganizeFolders(TreeNode node, bool expand = false)
+        /// <param name="expanding">Executing in AfterExpand event</param>
+        private void ReorganizeFolders(TreeNode node, bool expanding = false)
         {
             debug_message("ReorganizeFolders");
             try
@@ -203,8 +209,8 @@ namespace SsmsSchemaFolders
                             case "Server/Database/SystemViewsFolder":
                             case "Server/Database/SystemStoredProceduresFolder":
                                 //node.TreeView.Cursor = Cursors.WaitCursor;
-                                var schemaFolderCount = _objectExplorerExtender.ReorganizeNodes(node, SchemaFolderNodeTag);
-                                if (expand && schemaFolderCount == 1)
+                                var schemaFolderCount = _objectExplorerExtender.ReorganizeNodes(node, SchemaFolderNodeTag, expanding);
+                                if (expanding && schemaFolderCount == 1)
                                 {
                                     node.LastNode.Expand();
                                 }
@@ -226,6 +232,8 @@ namespace SsmsSchemaFolders
                             default:
                                 // Server/DatabasesFolder
                                 // Server/Database
+                                // Server/JobServer
+                                // Server/JobServer/JobsFolder
                                 debug_message(urnPath);
                                 break;
                         }
@@ -234,7 +242,9 @@ namespace SsmsSchemaFolders
             }
             catch (Exception ex)
             {
-                ActivityLogEntry(__ACTIVITYLOG_ENTRYTYPE.ALE_ERROR, ex.ToString());
+                var error = ex.ToString();
+                ActivityLogEntry(__ACTIVITYLOG_ENTRYTYPE.ALE_ERROR, error);
+                MessageBox.Show(error,"SSMS Schema Folders", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -246,13 +256,20 @@ namespace SsmsSchemaFolders
         /// <param name="e">expanding node</param>
         void ObjectExplorerTreeViewAfterExpandCallback(object sender, TreeViewEventArgs e)
         {
-            debug_message("\nObjectExplorerTreeViewAfterExpandCallback");
+            debug_message("\nObjectExplorerTreeViewAfterExpandCallback:{0}:{1}", e.Node.Text, Form.ModifierKeys);
             // Wait for the async node expand to finish or we could miss nodes
             try
             {
                 debug_message("Node.Count:{0}", e.Node.GetNodeCount(false));
 
-                if (!Options.Enabled)
+                if (Options.EnabledModifierKeys != Keys.None)
+                {
+                    var modifierKeys = Options.EnabledModifierKeys & Keys.Modifiers;
+                    if (Options.Enabled && Form.ModifierKeys == modifierKeys
+                        || !Options.Enabled && Form.ModifierKeys != modifierKeys)
+                        return;
+                }
+                else if (!Options.Enabled)
                     return;
 
                 if (e.Node.TreeView.InvokeRequired)
@@ -304,12 +321,15 @@ namespace SsmsSchemaFolders
                 }
                 else
                 {
+                    debug_message("node.Expanded");
                     //ReorganizeFolders(e.Node, true);
                 }
             }
             catch (Exception ex)
             {
-                ActivityLogEntry(__ACTIVITYLOG_ENTRYTYPE.ALE_ERROR, ex.ToString());
+                var error = ex.ToString();
+                ActivityLogEntry(__ACTIVITYLOG_ENTRYTYPE.ALE_ERROR, error);
+                MessageBox.Show(error, "SSMS Schema Folders", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -320,15 +340,25 @@ namespace SsmsSchemaFolders
         /// <param name="e"></param>
         void ObjectExplorerTreeViewBeforeExpandCallback(object sender, TreeViewCancelEventArgs e)
         {
-            debug_message("\nObjectExplorerTreeViewBeforeExpandCallback");
+            debug_message("\nObjectExplorerTreeViewBeforeExpandCallback:{0}:{1}", e.Node.Text, Form.ModifierKeys);
             try
             {
-                if (!Options.Enabled)
+
+                if (Options.EnabledModifierKeys != Keys.None)
+                {
+                    var modifierKeys = Options.EnabledModifierKeys & Keys.Modifiers;
+                    if (Options.Enabled && Form.ModifierKeys == modifierKeys
+                        || !Options.Enabled && Form.ModifierKeys != modifierKeys)
+                        return;
+                }
+                else if (!Options.Enabled)
                     return;
 
-                debug_message("Node.Count:{0}", e.Node.GetNodeCount(false));
+                var nodeCount = e.Node.GetNodeCount(false);
 
-                if (e.Node.GetNodeCount(false) == 1)
+                debug_message("Node.Count:{0}", nodeCount);
+
+                if (nodeCount == 1)
                     return;
 
                 if (_objectExplorerExtender.GetNodeExpanding(e.Node))
@@ -337,10 +367,16 @@ namespace SsmsSchemaFolders
                     //doing a reorg before expand stops the treeview from jumping
                     ReorganizeFolders(e.Node);
                 }
+                else
+                {
+                    debug_message("node.Expanded");
+                }
             }
             catch (Exception ex)
             {
-                ActivityLogEntry(__ACTIVITYLOG_ENTRYTYPE.ALE_ERROR, ex.ToString());
+                var error = ex.ToString();
+                ActivityLogEntry(__ACTIVITYLOG_ENTRYTYPE.ALE_ERROR, error);
+                MessageBox.Show(error, "SSMS Schema Folders", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             
         }
@@ -368,6 +404,7 @@ namespace SsmsSchemaFolders
             debug_message(message);
 
             // Logs to %AppData%\Microsoft\VisualStudio\14.0\ActivityLog.XML.
+            // Logs to %AppData%\Microsoft\AppEnv\15.0\ActivityLog.XML.
             // Recommended to obtain the activity log just before writing to it. Do not cache or save the activity log for future use.
             var log = GetService(typeof(SVsActivityLog)) as IVsActivityLog;
             if (log == null) return;

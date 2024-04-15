@@ -38,7 +38,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>C:\Program Files %28x86%29\Microsoft SQL Server Management Studio 20\Common7\IDE\Extensions\SSMS-Schema-Folders\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -48,7 +48,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>C:\Program Files %28x86%29\Microsoft SQL Server Management Studio 20\Common7\IDE\Extensions\SSMS-Schema-Folders\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -136,9 +136,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Resources.de.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Resources.de.resx" />
     <EmbeddedResource Include="Resources\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -163,6 +161,11 @@
       <Project>{7052a9c5-1263-433d-a758-1da44d784e2f}</Project>
       <Name>SsmsSchemaFolders.Ssms19</Name>
       <Aliases>Ssms19</Aliases>
+    </ProjectReference>
+    <ProjectReference Include="SsmsSchemaFolders.Ssms20.csproj">
+      <Project>{fe225e51-5b7e-4100-939b-d262cc6fd169}</Project>
+      <Name>SsmsSchemaFolders.Ssms20</Name>
+      <Aliases>Ssms20</Aliases>
     </ProjectReference>
     <ProjectReference Include="SsmsSchemaFolders.Ssms2012.csproj">
       <Project>{9c9fa743-0d5d-4847-9544-3ad0ffbad79f}</Project>
